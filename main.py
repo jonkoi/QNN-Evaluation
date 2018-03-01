@@ -18,7 +18,7 @@ tf.app.flags.DEFINE_integer('batch_size', 128,
                             """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_integer('num_epochs', -1,
                             """Number of epochs to train. -1 for unlimited""")
-tf.app.flags.DEFINE_integer('learning_rate', 1e-2,
+tf.app.flags.DEFINE_integer('learning_rate', 1e-3,
                             """Initial learning rate used.""")
 tf.app.flags.DEFINE_string('model', 'model',
                            """Name of loaded model.""")
@@ -28,7 +28,7 @@ tf.app.flags.DEFINE_string('load', None,
                            """Name of loaded dir.""")
 tf.app.flags.DEFINE_string('dataset', 'cifar10',
                            """Name of dataset used.""")
-tf.app.flags.DEFINE_string('gpu', False,
+tf.app.flags.DEFINE_string('gpu', True,
                            """use gpu.""")
 tf.app.flags.DEFINE_string('device', 0,
                            """which gpu to use.""")

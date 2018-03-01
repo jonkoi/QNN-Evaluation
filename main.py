@@ -3,7 +3,7 @@ import importlib
 import tensorflow.python.platform
 import os
 import numpy as np
-from progress.bar import Bar
+from progressbar import Bar
 from datetime import datetime
 from tensorflow.python.platform import gfile
 from data import *

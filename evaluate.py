@@ -5,7 +5,7 @@ from __future__ import print_function
 from datetime import datetime
 import math
 import time
-from progress.bar import Bar
+from progressbar import Bar
 
 import numpy as np
 import tensorflow as tf

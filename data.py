@@ -133,14 +133,16 @@ class DataProvider:
         image, label = self.data
         if self.training:
             images, label_batch = tf.train.shuffle_batch(
-            [preprocess_training(image, height=self.size[1], width=self.size[2]), label],
+            #[preprocess_training(image, height=self.size[1], width=self.size[2]), label],
+			      [image, label],
             batch_size=batch_size,
             num_threads=num_threads,
             capacity=min_queue_examples + 3 * batch_size,
             min_after_dequeue=min_queue_examples)
         else:
             images, label_batch = tf.train.batch(
-            [preprocess_evaluation(image, height=self.size[1], width=self.size[2]), label],
+            #[preprocess_evaluation(image, height=self.size[1], width=self.size[2]), label],
+			      [image, label],
             batch_size=batch_size,
             num_threads=num_threads,
             capacity=min_queue_examples + 3 * batch_size)

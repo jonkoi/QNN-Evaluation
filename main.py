@@ -8,6 +8,7 @@ from datetime import datetime
 from tensorflow.python.platform import gfile
 from data import *
 from evaluate import evaluate
+import time
 
 timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997
@@ -38,7 +39,8 @@ tf.app.flags.DEFINE_string('log', 'ERROR',
                            'The threshold for what messages will be logged '
                             """DEBUG, INFO, WARN, ERROR, or FATAL.""")
 
-FLAGS.checkpoint_dir = './results/' + FLAGS.save
+currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
 FLAGS.log_dir = FLAGS.checkpoint_dir + '/log/'
 # tf.logging.set_verbosity(FLAGS.log)
 

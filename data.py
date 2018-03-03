@@ -223,5 +223,3 @@ def get_data_provider(name, training=True):
         else:
             return DataProvider([os.path.join(data_dir, 'test.bin')],
                                 10000, False, __read_cifar)
-if __name__ == '__main__':
-    get_data_provider('cifar10')

@@ -12,11 +12,11 @@ from evaluate import evaluate
 timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997
 FLAGS = tf.app.flags.FLAGS
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # Basic model parameters.
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_integer('num_epochs', 128,
+tf.app.flags.DEFINE_integer('num_epochs', 256,
                             """Number of epochs to train. -1 for unlimited""")
 tf.app.flags.DEFINE_integer('learning_rate', 1e-3,
                             """Initial learning rate used.""")

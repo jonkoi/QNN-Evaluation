@@ -42,7 +42,7 @@ tf.app.flags.DEFINE_string('log', 'ERROR',
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
 FLAGS.log_dir = FLAGS.checkpoint_dir + '/log/'
-# tf.logging.set_verbosity(FLAGS.log)
+#tf.logging.set_verbosity(FLAGS.log)
 
 def count_params(var_list):
     num = 0

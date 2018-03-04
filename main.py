@@ -13,7 +13,6 @@ import time
 timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997
 FLAGS = tf.app.flags.FLAGS
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 # Basic model parameters.
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             """Number of images to process in a batch.""")

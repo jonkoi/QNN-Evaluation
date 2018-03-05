@@ -9,7 +9,6 @@ from tensorflow.python.platform import gfile
 from data import *
 from evaluate import evaluate
 import time
-import logging
 
 timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997
@@ -214,17 +213,6 @@ def train(model, data,
     coord.clear_stop()
     summary_writer.close()
 
-def logInit(filename):
-    logging.basicConfig(level=logging.INFO,
-                format='%(asctime)s %(levelname)s: %(message)s',
-                datefmt='%Y-%m-%d-%H-%M-%S',
-                filename='filename',
-                filemode='w')
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(levelname)s: %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
 
 def main(argv=None):  # pylint: disable=unused-argument
     if not gfile.Exists(FLAGS.checkpoint_dir):

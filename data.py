@@ -11,7 +11,6 @@ from six.moves import urllib
 import csv
 import glob
 import re
-import logging
 
 IMAGENET_PATH = './Datasets/ILSVRC2012/'
 DATA_DIR = '/home/xiaohang/dataset/'
@@ -34,7 +33,7 @@ def __maybe_download(data_url, dest_directory, apply_func=None):
     filepath, _ = urllib.request.urlretrieve(data_url, filepath, _progress)
     print()
     statinfo = os.stat(filepath)
-    logging.info('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
+    print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
     if apply_func is not None:
         apply_func(filepath)
 
@@ -224,14 +223,3 @@ def get_data_provider(name, training=True):
         else:
             return DataProvider([os.path.join(data_dir, 'test.bin')],
                                 10000, False, __read_cifar)
-def logInit(filename):
-    logging.basicConfig(level=logging.INFO,
-                format='%(asctime)s %(levelname)s %(message)s',
-                datefmt='%Y-%m-%d-%H-%M-%S',
-                filename='filename',
-                filemode='w')
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(levelname)s: %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)

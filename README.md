@@ -1,3 +1,10 @@
+## Update
+This implementation is based on https://github.com/itayhubara/BinaryNet.tf  
+Changes or update frome orginal version
+1. tensorflow dependency frome 1.2.1 to 1.4.0 with related code update
+2. adding logging function to implement local log recording
+3. results is saved by time format directory rather than covering mode like orignial version
+4. fix some bugs of orignial version to work well in tensorflow 1.4.0
 ## BinaryNet.tf
 Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1.  implementation in tensorflow (https://papers.nips.cc/paper/6573-binarized-neural-networks)
 

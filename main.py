@@ -34,7 +34,7 @@ tf.app.flags.DEFINE_string('device', 0,
                            """which gpu to use.""")
 tf.app.flags.DEFINE_string('summary', True,
                            """Record summary.""")
-tf.app.flags.DEFINE_string('log', 'ERROR',
+tf.app.flags.DEFINE_string('log', 'INFO',
                            'The threshold for what messages will be logged '
                             """DEBUG, INFO, WARN, ERROR, or FATAL.""")
 

@@ -41,6 +41,7 @@ tf.app.flags.DEFINE_string('log', 'INFO',
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
 FLAGS.log_dir = FLAGS.checkpoint_dir + '/log/'
+FLAGS.loggingFile=FLAGS.checkpoint_dir+'.log'
 #tf.logging.set_verbosity(FLAGS.log)
 
 def count_params(var_list):
@@ -165,7 +166,7 @@ def train(model, data,
     summary_writer = tf.summary.FileWriter(log_dir, graph=sess.graph)
     epoch = 0
 
-    print('num of trainable paramaters: %d' %
+    logging.info('num of trainable paramaters: %d' %
           count_params(tf.trainable_variables()))
     while epoch != num_epochs:
         epoch += 1
@@ -175,7 +176,7 @@ def train(model, data,
         #with tf.Session() as session:
         #    print(session.run(ww))
 
-        print('Started epoch %d' % epoch)
+        logging.info('Started epoch %d' % epoch)
         bar = Bar('Training', max=num_batches,
                   suffix='%(percent)d%% eta: %(eta)ds')
         while curr_step < data.size[0]:
@@ -188,16 +189,16 @@ def train(model, data,
         saver.save(sess, save_path=checkpoint_dir +
                    '/model.ckpt', global_step=global_step)
         bar.finish()
-        print('Finished epoch %d' % epoch)
-        print('Training Accuracy: %.3f' % acc_value)
-        print('Training Loss: %.3f' % loss_value)
+        logging.info('Finished epoch %d' % epoch)
+        logging.info('Training Accuracy: %.3f' % acc_value)
+        logging.info('Training Loss: %.3f' % loss_value)
 
         test_acc, test_loss = evaluate(model, FLAGS.dataset,
                                        batch_size=batch_size,
                                        checkpoint_dir=checkpoint_dir)  # ,
         # log_dir=log_dir)
-        print('Test Accuracy: %.3f' % test_acc)
-        print('Test Loss: %.3f' % test_loss)
+        logging.info('Test Accuracy: %.3f' % test_acc)
+        logging.info('Test Loss: %.3f' % test_loss)
 
         summary_out = tf.Summary()
         summary_out.ParseFromString(summary)
@@ -220,6 +221,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         model_file = os.path.join('models', FLAGS.model + '.py')
         assert gfile.Exists(model_file), 'no model file named: ' + model_file
         gfile.Copy(model_file, FLAGS.checkpoint_dir + '/model.py')
+    logInit(FLAGS.loggingFile)
     m = importlib.import_module('.' + FLAGS.model, 'models')
     data = get_data_provider(FLAGS.dataset, training=True)
 

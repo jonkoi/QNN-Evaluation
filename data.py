@@ -13,7 +13,8 @@ import glob
 import re
 import logging
 
-IMAGENET_PATH = './Datasets/ILSVRC2012/'
+#IMAGENET_PATH = './Datasets/ILSVRC2012/'
+IMAGENET_PATH = '/home/xiaohang/dataset/ImageNet/'
 DATA_DIR = '/home/xiaohang/dataset/'
 URLs = {
     'cifar10': 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz',

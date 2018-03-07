@@ -66,7 +66,7 @@ WORK_DIR="./"
 
 # Download the ImageNet data.
 LABELS_FILE="${WORK_DIR}/imagenet_lsvrc_2015_synsets.txt"
-if [ $1 == "download"]
+if [ $1 == "download"];then
     echo "Downloading ImageNet Dataset"
     DOWNLOAD_SCRIPT="${WORK_DIR}/download_imagenet.sh"
     "${DOWNLOAD_SCRIPT}" "${SCRATCH_DIR}" "${LABELS_FILE}"

@@ -80,7 +80,7 @@ VALIDATION_DIRECTORY="${SCRATCH_DIR}/ILSVRC2012_img_val/"
 echo "Organizing the validation data into sub-directories."
 PREPROCESS_VAL_SCRIPT="${WORK_DIR}preprocess_imagenet_validation_data.py"
 VAL_LABELS_FILE="${WORK_DIR}imagenet_2012_validation_synset_labels.txt"
-#"${PREPROCESS_VAL_SCRIPT}" "${VALIDATION_DIRECTORY}" "${VAL_LABELS_FILE}"
+"${PREPROCESS_VAL_SCRIPT}" "${VALIDATION_DIRECTORY}" "${VAL_LABELS_FILE}"
 
 # Convert the XML files for bounding box annotations into a single CSV.
 echo "Extracting bounding box information from XML."
@@ -88,8 +88,8 @@ BOUNDING_BOX_SCRIPT="${WORK_DIR}process_bounding_boxes.py"
 BOUNDING_BOX_FILE="${SCRATCH_DIR}/imagenet_2012_bounding_boxes.csv"
 BOUNDING_BOX_DIR="${SCRATCH_DIR}/ILSVRC2012_bbox_train/"
 
-#"${BOUNDING_BOX_SCRIPT}" "${BOUNDING_BOX_DIR}" "${LABELS_FILE}" \
- #| sort > "${BOUNDING_BOX_FILE}"
+"${BOUNDING_BOX_SCRIPT}" "${BOUNDING_BOX_DIR}" "${LABELS_FILE}" \
+| sort > "${BOUNDING_BOX_FILE}"
 echo "Finished downloading and preprocessing the ImageNet data."
 
 # Build the TFRecords version of the ImageNet data.

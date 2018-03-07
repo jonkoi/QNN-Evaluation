@@ -36,7 +36,7 @@ a sharded data set consisting of 1024 and 128 TFRecord files, respectively.
   train_directory/train-00000-of-01024
   train_directory/train-00001-of-01024
   ...
-  train_directory/train-01023-of-01024
+  train_directory/train-00127-of-01024
 
 and
 
@@ -54,7 +54,7 @@ serialized Example proto. The Example proto contains the following fields:
   image/width: integer, image width in pixels
   image/colorspace: string, specifying the colorspace, always 'RGB'
   image/channels: integer, specifying the number of channels, always 3
-  image/format: string, specifying the format, always 'JPEG'
+  image/format: string, specifying the format, always'JPEG'
 
   image/filename: string containing the basename of the image file
             e.g. 'n01440764_10026.JPEG' or 'ILSVRC2012_val_00000293.JPEG'
@@ -80,7 +80,7 @@ serialized Example proto. The Example proto contains the following fields:
 Note that the length of xmin is identical to the length of xmax, ymin and ymax
 for each example.
 
-Running this script using 16 threads may take around ~2.5 hours on an HP Z420.
+Running this script using 16 threads may take around ~2.5 hours on a HP Z420.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -92,8 +92,9 @@ import random
 import sys
 import threading
 
+#import google3
 import numpy as np
-import six
+from six.moves import xrange
 import tensorflow as tf
 
 tf.app.flags.DEFINE_string('train_directory', '/tmp/',
@@ -108,7 +109,7 @@ tf.app.flags.DEFINE_integer('train_shards', 1024,
 tf.app.flags.DEFINE_integer('validation_shards', 128,
                             'Number of shards in validation TFRecord files.')
 
-tf.app.flags.DEFINE_integer('num_threads', 16,
+tf.app.flags.DEFINE_integer('num_threads',16 ,
                             'Number of threads to preprocess the images.')
 
 # The labels file contains a list of valid labels are held in this file.
@@ -171,8 +172,6 @@ def _float_feature(value):
 
 def _bytes_feature(value):
   """Wrapper for inserting bytes features into Example proto."""
-  if isinstance(value, six.string_types):           
-    value = six.binary_type(value, encoding='utf-8') 
   return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
@@ -315,8 +314,7 @@ def _process_image(filename, coder):
     width: integer, image width in pixels.
   """
   # Read the image file.
-  with tf.gfile.FastGFile(filename, 'rb') as f:
-    image_data = f.read()
+  image_data = tf.gfile.FastGFile(filename, 'r').read()
 
   # Clean the dirty data.
   if _is_png(filename):
@@ -372,7 +370,7 @@ def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
   num_files_in_thread = ranges[thread_index][1] - ranges[thread_index][0]
 
   counter = 0
-  for s in range(num_shards_per_batch):
+  for s in xrange(num_shards_per_batch):
     # Generate a sharded version of the file name, e.g. 'train-00002-of-00010'
     shard = thread_index * num_shards_per_batch + s
     output_filename = '%s-%.5d-of-%.5d' % (name, shard, num_shards)
@@ -436,8 +434,8 @@ def _process_image_files(name, filenames, synsets, labels, humans,
   spacing = np.linspace(0, len(filenames), FLAGS.num_threads + 1).astype(np.int)
   ranges = []
   threads = []
-  for i in range(len(spacing) - 1):
-    ranges.append([spacing[i], spacing[i + 1]])
+  for i in xrange(len(spacing) - 1):
+    ranges.append([spacing[i], spacing[i+1]])
 
   # Launch a thread for each batch.
   print('Launching %d threads for spacings: %s' % (FLAGS.num_threads, ranges))
@@ -450,7 +448,7 @@ def _process_image_files(name, filenames, synsets, labels, humans,
   coder = ImageCoder()
 
   threads = []
-  for thread_index in range(len(ranges)):
+  for thread_index in xrange(len(ranges)):
     args = (coder, thread_index, ranges, name, filenames,
             synsets, labels, humans, bboxes, num_shards)
     t = threading.Thread(target=_process_image_files_batch, args=args)
@@ -526,7 +524,7 @@ def _find_image_files(data_dir, labels_file):
   # Shuffle the ordering of all image files in order to guarantee
   # random ordering of the images with respect to label in the
   # saved TFRecord files. Make the randomization repeatable.
-  shuffled_index = list(range(len(filenames)))
+  shuffled_index = range(len(filenames))
   random.seed(12345)
   random.shuffle(shuffled_index)
 

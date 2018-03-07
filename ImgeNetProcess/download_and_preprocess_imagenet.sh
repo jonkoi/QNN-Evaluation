@@ -62,7 +62,7 @@ DATA_DIR="${1%/}"
 SCRATCH_DIR="${DATA_DIR}"
 mkdir -p "${DATA_DIR}"
 mkdir -p "${SCRATCH_DIR}"
-WORK_DIR="./"
+WORK_DIR=""
 
 # Download the ImageNet data.
 LABELS_FILE="${WORK_DIR}/imagenet_lsvrc_2015_synsets.txt"
@@ -80,7 +80,7 @@ VALIDATION_DIRECTORY="${SCRATCH_DIR}/ILSVRC2012_img_val/"
 echo "Organizing the validation data into sub-directories."
 PREPROCESS_VAL_SCRIPT="${WORK_DIR}preprocess_imagenet_validation_data.py"
 VAL_LABELS_FILE="${WORK_DIR}imagenet_2012_validation_synset_labels.txt"
-"${PREPROCESS_VAL_SCRIPT}" "${VALIDATION_DIRECTORY}" "${VAL_LABELS_FILE}"
+#"${PREPROCESS_VAL_SCRIPT}" "${VALIDATION_DIRECTORY}" "${VAL_LABELS_FILE}"
 
 # Convert the XML files for bounding box annotations into a single CSV.
 echo "Extracting bounding box information from XML."
@@ -88,16 +88,16 @@ BOUNDING_BOX_SCRIPT="${WORK_DIR}process_bounding_boxes.py"
 BOUNDING_BOX_FILE="${SCRATCH_DIR}/imagenet_2012_bounding_boxes.csv"
 BOUNDING_BOX_DIR="${SCRATCH_DIR}/ILSVRC2012_bbox_train/"
 
-"${BOUNDING_BOX_SCRIPT}" "${BOUNDING_BOX_DIR}" "${LABELS_FILE}" \
- | sort > "${BOUNDING_BOX_FILE}"
+#"${BOUNDING_BOX_SCRIPT}" "${BOUNDING_BOX_DIR}" "${LABELS_FILE}" \
+ #| sort > "${BOUNDING_BOX_FILE}"
 echo "Finished downloading and preprocessing the ImageNet data."
 
 # Build the TFRecords version of the ImageNet data.
-BUILD_SCRIPT="${WORK_DIR}build_imagenet_data"
+BUILD_SCRIPT="${WORK_DIR}build_imagenet_data.py"
 OUTPUT_DIRECTORY="${DATA_DIR}/TFRecords"
 IMAGENET_METADATA_FILE="${WORK_DIR}imagenet_metadata.txt"
 
-"${BUILD_SCRIPT}" \
+python "${BUILD_SCRIPT}" \
   --train_directory="${TRAIN_DIRECTORY}" \
   --validation_directory="${VALIDATION_DIRECTORY}" \
   --output_directory="${OUTPUT_DIRECTORY}" \

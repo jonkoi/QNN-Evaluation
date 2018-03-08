@@ -13,7 +13,6 @@ import glob
 import re
 import logging
 from ImageNetReading.imagenet_data import ImagenetData
-import ImageNetReading.image_processing
 
 #IMAGENET_PATH = './Datasets/ILSVRC2012/'
 IMAGENET_PATH = '/home/xiaohang/dataset/ImageNet/TFRecords'

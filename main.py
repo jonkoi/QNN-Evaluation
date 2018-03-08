@@ -10,7 +10,7 @@ from data import *
 from evaluate import evaluate
 import time
 
-import ImageNetReading.image_processing
+from ImageNetReading import image_processing
 
 timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997

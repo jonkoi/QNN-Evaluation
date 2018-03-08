@@ -20,7 +20,7 @@ from __future__ import print_function
 
 
 
-from dataset import Dataset
+from ImageNetReading.dataset import Dataset
 
 
 class ImagenetData(Dataset):

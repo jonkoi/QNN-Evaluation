@@ -12,6 +12,8 @@ import csv
 import glob
 import re
 import logging
+from ImageNetReading.imagenet_data import ImagenetData
+import ImageNetReading.image_processing
 
 #IMAGENET_PATH = './Datasets/ILSVRC2012/'
 IMAGENET_PATH = '/home/xiaohang/dataset/ImageNet/TFRecords'
@@ -200,7 +202,10 @@ def group_batch_images(x):
 
 def get_data_provider(name, training=True):
     if name == 'imagenet':
-        return DataProvider(__read_imagenet(IMAGENET_PATH), [1280000, 224, 224, 3], True)
+        dataset = ImagenetData(subset='train')
+        assert dataset.data_files()
+        return dataset
+        #return DataProvider(__read_imagenet(IMAGENET_PATH), [1280000, 224, 224, 3], True)
     elif name == 'cifar10':
         path = os.path.join(DATA_DIR,'cifar10')
         url = URLs['cifar10']

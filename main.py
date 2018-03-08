@@ -96,7 +96,10 @@ def train(model, data,
     # tf Graph input
     with tf.device('/cpu:0'):
         with tf.name_scope('data'):
-            x, yt = data.generate_batches(batch_size)
+            if FLAGS.dataset == "imagenet" :
+                x, yt =image_processing.distorted_inputs(data,num_preprocess_threads=16)
+            else :
+                x, yt = data.generate_batches(batch_size)
 
         global_step =  tf.get_variable('global_step', shape=[], dtype=tf.int64,
                              initializer=tf.constant_initializer(0),

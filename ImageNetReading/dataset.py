@@ -48,6 +48,7 @@ class Dataset(object):
     assert subset in self.available_subsets(), self.available_subsets()
     self.name = name
     self.subset = subset
+    self.size = self.num_examples_per_epoch()
 
   @abstractmethod
   def num_classes(self):

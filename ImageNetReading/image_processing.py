@@ -124,7 +124,6 @@ def distorted_inputs(dataset, batch_size=None, num_preprocess_threads=None):
   """
   if not batch_size:
     batch_size = FLAGS.batch_size
-
   # Force all input processing onto CPU in order to reserve the GPU for
   # the forward inference and back-propagation.
   with tf.device('/cpu:0'):

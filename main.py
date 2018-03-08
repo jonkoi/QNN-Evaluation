@@ -99,7 +99,7 @@ def train(model, data,
     with tf.device('/cpu:0'):
         with tf.name_scope('data'):
             if FLAGS.dataset == "imagenet" :
-                x, yt =image_processing.distorted_inputs(data,num_preprocess_threads=16)
+                x, yt =image_processing.distorted_inputs(data,batch_size=batch_size,num_preprocess_threads=8)
             else :
                 x, yt = data.generate_batches(batch_size)
 
@@ -166,7 +166,6 @@ def train(model, data,
 
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
     num_batches = data.size[0] / batch_size
     summary_writer = tf.summary.FileWriter(log_dir, graph=sess.graph)
     epoch = 0

@@ -131,8 +131,7 @@ def distorted_inputs(dataset, batch_size=None, num_preprocess_threads=None):
         dataset, batch_size, train=True,
         num_preprocess_threads=num_preprocess_threads,
         num_readers=FLAGS.num_readers)
-  #return images, labels
-  return images, tf.reshape(labels, [batch_size])
+  return images, labels
 
 
 

@@ -99,7 +99,7 @@ def train(model, data,
     with tf.device('/cpu:0'):
         with tf.name_scope('data'):
             if FLAGS.dataset == "imagenet" :
-                x, yt =image_processing.distorted_inputs(data,batch_size=batch_size,num_preprocess_threads=8)
+                x, yt =image_processing.distorted_inputs(data,batch_size=batch_size,num_preprocess_threads=16)
             else :
                 x, yt = data.generate_batches(batch_size)
 

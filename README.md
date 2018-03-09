@@ -6,11 +6,18 @@ Changes or update frome orginal version
 3. results is saved by time format directory rather than covering mode like orignial version
 4. fix some bugs of orignial version to work well in tensorflow 1.4.0
 5. fix incorrect cifar10 data preprocessing code
-
+6. Using "sparse_softmax_cross_entropy_with_logits" loss function
 ## Dependencies
 tensorflow version 1.4.0
 
 ## Training
+* Train cifar10 model using gpu:
+py main.py --model cifar10 --save cifar10 --dataset cifar10 --device 1
+* Train cifar10 model using cpu:
+py main.py --model cifar10 --save cifar10 --dataset cifar10 --device 1 --False
+
+## Results
+Cifar10 should reach at least 89.6% top-1 accuracy
 
 #Below are original version descriptions
 ## BinaryNet.tf

@@ -77,7 +77,7 @@ def __read_cifar(filenames, shuffle=True, cifar100=False):
   depth_major = tf.reshape(
       tf.strided_slice(record_bytes, [label_bytes],
                        [label_bytes + image_bytes]),
-      [result.depth, result.height, result.width])
+      [depth, height, width])
   # Convert from [depth, height, width] to [height, width, depth].
   image = tf.transpose(depth_major, [1, 2, 0])
 
@@ -135,10 +135,6 @@ class DataProvider:
         # Create a queue that shuffles the examples, and then
         # read 'batch_size' images + labels from the example queue.
 
-        # Set the shapes of tensors.
-        float_image.set_shape([height, width, 3])
-        read_input.label.set_shape([1])
-
         # Ensure that the random shuffling has good mixing properties.
         min_fraction_of_examples_in_queue = 0.4
         min_queue_examples = int(self.size[0] *
@@ -146,6 +142,8 @@ class DataProvider:
         image, label = self.data
         if self.training:
             distorted_image=distorted_inputs(image, height=self.size[1], width=self.size[2], normalize=True)
+            distorted_image.set_shape([self.size[1], self.size[2], 3])
+            label.set_shape([1])
             images, label_batch = tf.train.shuffle_batch(
 			      [distorted_image, label],
             batch_size=batch_size,
@@ -154,6 +152,8 @@ class DataProvider:
             min_after_dequeue=min_queue_examples)
         else:
             image=distorted_inputs(image, height=self.size[1], width=self.size[2], normalize=True)
+            image.set_shape([self.size[1], self.size[2], 3])
+            label.set_shape([1])
             images, label_batch = tf.train.batch(
 			      [image, label],
             batch_size=batch_size,

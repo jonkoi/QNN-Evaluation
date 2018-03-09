@@ -44,7 +44,7 @@ import tensorflow as tf
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_integer('image_size', 299,
+tf.app.flags.DEFINE_integer('image_size', 224,
                             """Provide square images of this size.""")
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 16,
                             """Number of preprocessing threads per tower. """
@@ -166,7 +166,7 @@ def distort_color(image, thread_id=0, scope=None):
   Rather then adding that level of complication, we select a distinct ordering
   of color ops for each preprocessing thread.
 
-  Args:
+  Args: 
     image: Tensor containing single image.
     thread_id: preprocessing thread ID.
     scope: Optional scope for name_scope.
@@ -241,8 +241,8 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     if not thread_id:
       image_with_distorted_box = tf.image.draw_bounding_boxes(
           tf.expand_dims(image, 0), distort_bbox)
-      tf.summary.image('images_with_distorted_bounding_box',
-                       image_with_distorted_box)
+      #tf.summary.image('images_with_distorted_bounding_box',
+      #                image_with_distorted_box)
 
     # Crop the image to the specified bounding box.
     distorted_image = tf.slice(image, bbox_begin, bbox_size)
@@ -258,8 +258,9 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     # the third dimension.
     distorted_image.set_shape([height, width, 3])
     if not thread_id:
-      tf.summary.image('cropped_resized_image',
-                       tf.expand_dims(distorted_image, 0))
+      pass
+      #tf.summary.image('cropped_resized_image',
+      #                 tf.expand_dims(distorted_image, 0))
 
     # Randomly flip the image horizontally.
     distorted_image = tf.image.random_flip_left_right(distorted_image)
@@ -268,8 +269,9 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     distorted_image = distort_color(distorted_image, thread_id)
 
     if not thread_id:
-      tf.summary.image('final_distorted_image',
-                       tf.expand_dims(distorted_image, 0))
+      pass
+      #tf.summary.image('final_distorted_image',
+      #                 tf.expand_dims(distorted_image, 0))
     return distorted_image
 
 
@@ -505,6 +507,6 @@ def batch_inputs(dataset, batch_size, train, num_preprocess_threads=None,
     images = tf.reshape(images, shape=[batch_size, height, width, depth])
 
     # Display the training images in the visualizer.
-    tf.summary.image('images', images)
+    #tf.summary.image('images', images)
 
     return images, tf.reshape(label_index_batch, [batch_size])

@@ -17,7 +17,8 @@ py main.py --model cifar10 --save cifar10 --dataset cifar10 --device 1
 py main.py --model cifar10 --save cifar10 --dataset cifar10 --device 1 --False
 
 ## Results
-Cifar10 should reach at least 89.6% top-1 accuracy
+Cifar10 : 89.6% top-1 accuracy(64 epochs)
+BNNCifar10 : 82.3% top-1 accuracy(64 epochs)
 
 #Below are original version descriptions
 ## BinaryNet.tf

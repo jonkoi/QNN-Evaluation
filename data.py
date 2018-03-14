@@ -151,7 +151,7 @@ class DataProvider:
             capacity=min_queue_examples + 3 * batch_size,
             min_after_dequeue=min_queue_examples)
         else:
-            image=distorted_inputs(image, height=self.size[1], width=self.size[2], normalize=True)
+            image=inputs(image, height=self.size[1], width=self.size[2], normalize=True)
             image.set_shape([self.size[1], self.size[2], 3])
             label.set_shape([1])
             images, label_batch = tf.train.batch(
@@ -211,7 +211,10 @@ def group_batch_images(x):
 
 def get_data_provider(name, training=True):
     if name == 'imagenet':
-        dataset = ImagenetData(subset='train')
+        if training:
+          dataset = ImagenetData(subset='train')
+        else:
+          dataset = ImagenetData(subset='validation')
         assert dataset.data_files()
         return dataset
         #return DataProvider(__read_imagenet(IMAGENET_PATH), [1280000, 224, 224, 3], True)

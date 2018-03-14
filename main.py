@@ -16,9 +16,9 @@ timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 128,
+tf.app.flags.DEFINE_integer('batch_size', 256,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_integer('num_epochs', 64,
+tf.app.flags.DEFINE_integer('num_epochs', 128,
                             """Number of epochs to train. -1 for unlimited""")
 tf.app.flags.DEFINE_integer('learning_rate', 1e-3,
                             """Initial learning rate used.""")
@@ -39,7 +39,10 @@ tf.app.flags.DEFINE_string('summary', True,
 tf.app.flags.DEFINE_string('log', 'INFO',
                            'The threshold for what messages will be logged '
                             """DEBUG, INFO, WARN, ERROR, or FATAL.""")
-
+tf.app.flags.DEFINE_string('display_interval', 50,
+                           """Interval steps for displaying and summary train loss""")
+tf.app.flags.DEFINE_string('test_interval', 500,
+                           """Interval steps for test loss and accuracy""")
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
 FLAGS.log_dir = FLAGS.checkpoint_dir + '/log/'
@@ -184,8 +187,11 @@ def train(model, data,
         bar = Bar('Training', max=num_batches,
                   suffix='%(percent)d%% eta: %(eta)ds')
         while curr_step < data.size[0]:
-            _, loss_val = sess.run([train_op, loss])
+            #_, loss_val = sess.run([train_op, loss])
             curr_step += FLAGS.batch_size
+            _, loss_val,step, acc_value = sess.run(
+              [train_op,loss,global_step, accuracy])
+            logging.info("step %d loss %.3f accuracy %.3f" %(step,loss_val,acc_value))
             bar.next()
 
         step, acc_value, loss_value, summary = sess.run(
@@ -193,20 +199,18 @@ def train(model, data,
         saver.save(sess, save_path=checkpoint_dir +
                    '/model.ckpt', global_step=global_step)
         bar.finish()
-        logging.info('Finished epoch %d' % epoch)
-        logging.info('Training Accuracy: %.3f' % acc_value)
-        logging.info('Training Loss: %.3f' % loss_value)
+        logging.info("Finished epoch %d step %d loss %.3f accuracy %.3f" %(epoch,step,loss_value,acc_value))
 
-        test_acc, test_loss = evaluate(model, FLAGS.dataset,
+        test_top1,test_top5,test_loss = evaluate(model, FLAGS.dataset,
                                        batch_size=batch_size,
-                                       checkpoint_dir=checkpoint_dir)  # ,
+                                       checkpoint_dir=checkpoint_dir)
         # log_dir=log_dir)
-        logging.info('Test Accuracy: %.3f' % test_acc)
-        logging.info('Test Loss: %.3f' % test_loss)
+        logging.info('Test loss %.3f Test top1 %.3f Test top5 %.3f' % (test_loss,test_top1,test_top5))
 
         summary_out = tf.Summary()
         summary_out.ParseFromString(summary)
-        summary_out.value.add(tag='accuracy/test', simple_value=test_acc)
+        summary_out.value.add(tag='accuracy/test_top1', simple_value=test_top1)
+        summary_out.value.add(tag='accuracy/test_top5', simple_value=test_top5)
         summary_out.value.add(tag='loss/test', simple_value=test_loss)
         summary_writer.add_summary(summary_out, step)
         summary_writer.flush()

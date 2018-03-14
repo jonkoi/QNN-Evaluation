@@ -27,5 +27,5 @@ model = Sequential([
     BatchNormalization(),
     ReLU(),
     Dropout(0.5),
-    Affine(1000)
+    Affine(1001) #tensorflow adding 1 category for unused background class
 ])

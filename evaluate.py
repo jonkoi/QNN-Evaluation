@@ -10,6 +10,8 @@ from progress.bar import Bar
 import numpy as np
 import tensorflow as tf
 from data import get_data_provider
+from ImageNetReading import image_processing
+FLAGS = tf.app.flags.FLAGS
 
 def evaluate(model, dataset,
         batch_size=128,
@@ -17,7 +19,10 @@ def evaluate(model, dataset,
     with tf.Graph().as_default() as g:
         data = get_data_provider(dataset, training=False)
         with tf.device('/cpu:0'):
-            x, yt = data.generate_batches(batch_size)
+            if FLAGS.dataset == "imagenet" :
+                x, yt =image_processing.inputs(data,batch_size=batch_size,num_preprocess_threads=16)
+            else :
+                x, yt = data.generate_batches(batch_size)
             is_training = tf.placeholder(tf.bool,[],name='is_training')
 
         # Build the Graph that computes the logits predictions
@@ -25,8 +30,8 @@ def evaluate(model, dataset,
 
         # Calculate predictions.
         loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=yt, logits=y))
-        accuracy = tf.reduce_mean(tf.cast(tf.nn.in_top_k(y,yt,1), tf.float32))
-
+        accuracy_top1 = tf.reduce_mean(tf.cast(tf.nn.in_top_k(y,yt,1), tf.float32))
+        accuracy_top5 = tf.reduce_mean(tf.cast(tf.nn.in_top_k(y,yt,5), tf.float32))
         # Restore the moving average version of the learned variables for eval.
         #variable_averages = tf.train.ExponentialMovingAverage(
         #    MOVING_AVERAGE_DECAY)
@@ -60,19 +65,22 @@ def evaluate(model, dataset,
                                        start=True))
 
             num_batches = int(math.ceil(data.size[0] / batch_size))
-            total_acc = 0  # Counts the number of correct predictions per batch.
+            total_top1 = 0  # Counts the number of correct predictions per batch.
+            total_top5 = 0  # Counts the number of correct predictions per batch.
             total_loss = 0 # Sum the loss of predictions per batch.
             step = 0
             bar = Bar('Evaluating', max=num_batches,suffix='%(percent)d%% eta: %(eta)ds')
             while step < num_batches and not coord.should_stop():
-              acc_val, loss_val = sess.run([accuracy, loss])
-              total_acc += acc_val
+              acc_top1,acc_top5,loss_val = sess.run([accuracy_top1, accuracy_top5,loss])
+              total_top1 += acc_top1
+              total_top5 += acc_top5
               total_loss += loss_val
               step += 1
               bar.next()
 
             # Compute precision and loss
-            total_acc /= num_batches
+            total_top1 /= num_batches
+            total_top5 /= num_batches
             total_loss /= num_batches
 
             bar.finish()
@@ -83,14 +91,13 @@ def evaluate(model, dataset,
 
         coord.request_stop()
         coord.join(threads)
-        return total_acc, total_loss
+        return total_top1,total_top5,total_loss
 
 def main(argv=None):  # pylint: disable=unused-argument
   evaluate()
 
 
 if __name__ == '__main__':
-  FLAGS = tf.app.flags.FLAGS
   tf.app.flags.DEFINE_string('checkpoint_dir', './results/model',
                              """Directory where to read model checkpoints.""")
   tf.app.flags.DEFINE_string('dataset', 'cifar10',

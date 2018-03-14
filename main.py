@@ -39,9 +39,9 @@ tf.app.flags.DEFINE_string('summary', True,
 tf.app.flags.DEFINE_string('log', 'INFO',
                            'The threshold for what messages will be logged '
                             """DEBUG, INFO, WARN, ERROR, or FATAL.""")
-tf.app.flags.DEFINE_string('display_interval', 50,
+tf.app.flags.DEFINE_string('display_interval', None,
                            """Interval steps for displaying and summary train loss""")
-tf.app.flags.DEFINE_string('test_interval', 500,
+tf.app.flags.DEFINE_string('test_interval', None,
                            """Interval steps for test loss and accuracy""")
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
@@ -172,9 +172,9 @@ def train(model, data,
     num_batches = data.size[0] / batch_size
     summary_writer = tf.summary.FileWriter(log_dir, graph=sess.graph)
     epoch = 0
-
-    logging.info('num of trainable paramaters: %d' %
-          count_params(tf.trainable_variables()))
+    display_interval=FLAGS.display_interval or num_batches/10
+    test_interval=FLAGS.test_interval or num_batches/2
+    logging.info('num of trainable paramaters: %d' %count_params(tf.trainable_variables()))
     while epoch != num_epochs:
         epoch += 1
         curr_step = 0
@@ -187,33 +187,35 @@ def train(model, data,
         bar = Bar('Training', max=num_batches,
                   suffix='%(percent)d%% eta: %(eta)ds')
         while curr_step < data.size[0]:
-            #_, loss_val = sess.run([train_op, loss])
-            curr_step += FLAGS.batch_size
-            _, loss_val,step, acc_value = sess.run(
-              [train_op,loss,global_step, accuracy])
-            logging.info("step %d loss %.3f accuracy %.3f" %(step,loss_val,acc_value))
-            bar.next()
-
-        step, acc_value, loss_value, summary = sess.run(
-            [global_step, accuracy_avg, loss_avg, summary_op])
-        saver.save(sess, save_path=checkpoint_dir +
+            _, loss_val,step= sess.run(
+              [train_op,loss,global_step])
+            if step%display_interval==0:
+              step, acc_value, loss_value, summary = sess.run(
+                [global_step, accuracy_avg, loss_avg, summary_op])
+              logging.info("step %d loss %.3f accuracy %.3f" %(step,loss_value,acc_value))
+              summary_out = tf.Summary()
+              summary_out.ParseFromString(summary)
+              summary_writer.add_summary(summary_out, step)
+              summary_writer.flush()
+            if step%test_interval==0:
+              saver.save(sess, save_path=checkpoint_dir +
                    '/model.ckpt', global_step=global_step)
-        bar.finish()
-        logging.info("Finished epoch %d step %d loss %.3f accuracy %.3f" %(epoch,step,loss_value,acc_value))
-
-        test_top1,test_top5,test_loss = evaluate(model, FLAGS.dataset,
+              test_top1,test_top5,test_loss = evaluate(model, FLAGS.dataset,
                                        batch_size=batch_size,
                                        checkpoint_dir=checkpoint_dir)
-        # log_dir=log_dir)
-        logging.info('Test loss %.3f Test top1 %.3f Test top5 %.3f' % (test_loss,test_top1,test_top5))
+              logging.info('Test loss %.3f Test top1 %.3f Test top5 %.3f' % (test_loss,test_top1,test_top5))
+              summary_out = tf.Summary()
+              summary_out.ParseFromString(summary)
+              summary_out.value.add(tag='accuracy/test_top1', simple_value=test_top1)
+              summary_out.value.add(tag='accuracy/test_top5', simple_value=test_top5)
+              summary_out.value.add(tag='loss/test', simple_value=test_loss)
+              summary_writer.add_summary(summary_out, step)
+              summary_writer.flush()
+            curr_step += FLAGS.batch_size
+            bar.next()
 
-        summary_out = tf.Summary()
-        summary_out.ParseFromString(summary)
-        summary_out.value.add(tag='accuracy/test_top1', simple_value=test_top1)
-        summary_out.value.add(tag='accuracy/test_top5', simple_value=test_top5)
-        summary_out.value.add(tag='loss/test', simple_value=test_loss)
-        summary_writer.add_summary(summary_out, step)
-        summary_writer.flush()
+        bar.finish()
+        logging.info("Finished epoch %d " %epoch)
 
     # When done, ask the threads to stop.
     coord.request_stop()

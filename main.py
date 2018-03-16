@@ -86,12 +86,12 @@ def add_summaries(scalar_list=[], activation_list=[], var_list=[], grad_list=[])
             #tf.summary.scalar(activation.op.name + '/sparsity', tf.nn.zero_fraction(activation))
 
 
-def _learning_rate_decay_fn(learning_rate, global_step,decay_steps,decay_rate):
+def _learning_rate_decay_fn(learning_rate, global_step):
   return tf.train.exponential_decay(
       learning_rate,
       global_step,
-      decay_steps=1000,
-      decay_rate=0.9,
+      decay_steps=FLAGS.decay_steps,
+      decay_rate=FLAGS.decay_rate,
       staircase=True)
 
 learning_rate_decay_fn = _learning_rate_decay_fn

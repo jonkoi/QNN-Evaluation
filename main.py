@@ -43,10 +43,6 @@ tf.app.flags.DEFINE_string('display_interval', None,
                            """Interval steps for displaying and summary train loss""")
 tf.app.flags.DEFINE_string('test_interval', None,
                            """Interval steps for test loss and accuracy""")
-tf.app.flags.DEFINE_string('decay_steps', 1000,
-                           """learning step decay_steps""")
-tf.app.flags.DEFINE_string('decay_rate', 0.9,
-                           """learning rate decay_steps""")
 
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
@@ -90,8 +86,8 @@ def _learning_rate_decay_fn(learning_rate, global_step):
   return tf.train.exponential_decay(
       learning_rate,
       global_step,
-      decay_steps=FLAGS.decay_steps,
-      decay_rate=FLAGS.decay_rate,
+      decay_steps=1000,
+      decay_rate=0.9,
       staircase=True)
 
 learning_rate_decay_fn = _learning_rate_decay_fn

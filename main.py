@@ -86,8 +86,10 @@ def _learning_rate_decay_fn(learning_rate, global_step):
   return tf.train.exponential_decay(
       learning_rate,
       global_step,
-      decay_steps=1000,
-      decay_rate=0.9,
+      #decay_steps=1000,#cifar10
+      #decay_rate=0.9,
+      decay_steps=10000, #alexnet
+      decay_rate=0.96,
       staircase=True)
 
 learning_rate_decay_fn = _learning_rate_decay_fn

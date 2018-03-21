@@ -242,12 +242,12 @@ def get_data_provider(name, training=True):
         else:
             return DataProvider([os.path.join(data_dir, 'test.bin')],
                                 10000, False, __read_cifar)
-def logInit(fileName):
+def logInit(fileName,resume):
     logging.basicConfig(level=logging.INFO,
             format='%(asctime)s %(levelname)s: %(message)s',
             datefmt='%Y-%m-%d-%H-%M-%S',
             filename=fileName,
-            filemode='w')
+            filemode= 'a' if resume else 'w')
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     formatter = logging.Formatter('%(levelname)s: %(message)s')

@@ -12,7 +12,6 @@ import time
 
 from ImageNetReading import image_processing
 
-timestr = '-'.join(str(x) for x in list(tuple(datetime.now().timetuple())[:6]))
 MOVING_AVERAGE_DECAY = 0.997
 FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
@@ -24,10 +23,12 @@ tf.app.flags.DEFINE_integer('learning_rate', 1e-3,
                             """Initial learning rate used.""")
 tf.app.flags.DEFINE_string('model', 'model',
                            """Name of loaded model.""")
-tf.app.flags.DEFINE_string('save', timestr,
+tf.app.flags.DEFINE_string('save', None,
                            """Name of saved dir.""")
 tf.app.flags.DEFINE_string('load', None,
-                           """Name of loaded dir.""")
+                           """Name of loaded dir for resume training.""")
+tf.app.flags.DEFINE_string('resume', False,
+                           """if resume training or not.""")
 tf.app.flags.DEFINE_string('dataset', 'cifar10',
                            """Name of dataset used.""")
 tf.app.flags.DEFINE_string('gpu', True,
@@ -45,7 +46,7 @@ tf.app.flags.DEFINE_string('test_interval', None,
                            """Interval steps for test loss and accuracy""")
 
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-FLAGS.checkpoint_dir = './results/' + FLAGS.save+'/'+currentTime
+FLAGS.checkpoint_dir = FLAGS.load if FLAGS.resume else  './results/' + FLAGS.save+'/'+currentTime
 FLAGS.log_dir = FLAGS.checkpoint_dir + '/log/'
 FLAGS.loggingFile=FLAGS.checkpoint_dir+'.log'
 #tf.logging.set_verbosity(FLAGS.log)
@@ -86,10 +87,10 @@ def _learning_rate_decay_fn(learning_rate, global_step):
   return tf.train.exponential_decay(
       learning_rate,
       global_step,
-      #decay_steps=1000,#cifar10
-      #decay_rate=0.9,
-      decay_steps=10000, #alexnet
-      decay_rate=0.96,
+      decay_steps=1000,#cifar10
+      decay_rate=0.9,
+      #decay_steps=10000, #alexnet
+      #decay_rate=0.96,
       staircase=True)
 
 learning_rate_decay_fn = _learning_rate_decay_fn
@@ -108,7 +109,6 @@ def train(model, data,
                 x, yt =image_processing.distorted_inputs(data,batch_size=batch_size,num_preprocess_threads=16)
             else :
                 x, yt = data.generate_batches(batch_size)
-
         global_step =  tf.get_variable('global_step', shape=[], dtype=tf.int64,
                              initializer=tf.constant_initializer(0),
                              trainable=False)
@@ -157,7 +157,6 @@ def train(model, data,
             # grad_list=grads)
 
     summary_op = tf.summary.merge_all()
-
     # Configure options for session
     gpu_options = tf.GPUOptions(allow_growth=True)
     sess = tf.InteractiveSession(
@@ -167,14 +166,27 @@ def train(model, data,
             gpu_options=gpu_options,
         )
     )
-    saver = tf.train.Saver(max_to_keep=5)
-    sess.run(tf.global_variables_initializer())
+    if FLAGS.resume:
+      print 'resuming from '+checkpoint_dir
+      saver = tf.train.Saver()
+      ckpt = tf.train.get_checkpoint_state(checkpoint_dir+'/')
+      if ckpt and ckpt.model_checkpoint_path:
+      # Restores from checkpoint
+        saver.restore(sess, ckpt.model_checkpoint_path)
+      else:
+        print('No checkpoint file found')
+        return
+      #print sess.run('global_step:0')
+      #print global_step.eval()
+    else:
+      saver = tf.train.Saver(max_to_keep=5)
+      sess.run(tf.global_variables_initializer())
 
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     num_batches = data.size[0] / batch_size
     summary_writer = tf.summary.FileWriter(log_dir, graph=sess.graph)
-    epoch = 0
+    epoch = global_step.eval()/num_batches if FLAGS.resume else 0
     display_interval=FLAGS.display_interval or num_batches/10
     test_interval=FLAGS.test_interval or num_batches/2
     logging.info('num of trainable paramaters: %d' %count_params(tf.trainable_variables()))
@@ -234,7 +246,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         model_file = os.path.join('models', FLAGS.model + '.py')
         assert gfile.Exists(model_file), 'no model file named: ' + model_file
         gfile.Copy(model_file, FLAGS.checkpoint_dir + '/model.py')
-    logInit(FLAGS.loggingFile)
+    logInit(FLAGS.loggingFile,resume=FLAGS.resume)
     m = importlib.import_module('.' + FLAGS.model, 'models')
     data = get_data_provider(FLAGS.dataset, training=True)
 

@@ -44,6 +44,10 @@ tf.app.flags.DEFINE_string('display_interval', None,
                            """Interval steps for displaying and summary train loss""")
 tf.app.flags.DEFINE_string('test_interval', None,
                            """Interval steps for test loss and accuracy""")
+tf.app.flags.DEFINE_integer('decay_steps', 1000,
+                           """decay  steps for learning""")
+tf.app.flags.DEFINE_float('decay_rate', 0.9,
+                           """decay rate for learning""")
 
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = FLAGS.load if FLAGS.resume else  './results/' + FLAGS.save+'/'+currentTime
@@ -87,10 +91,8 @@ def _learning_rate_decay_fn(learning_rate, global_step):
   return tf.train.exponential_decay(
       learning_rate,
       global_step,
-      decay_steps=1000,#cifar10
-      decay_rate=0.9,
-      #decay_steps=10000, #alexnet
-      #decay_rate=0.96,
+      decay_steps=FLAGS.decay_steps ,
+      decay_rate=FLAGS.decay_rate,
       staircase=True)
 
 learning_rate_decay_fn = _learning_rate_decay_fn
@@ -167,7 +169,7 @@ def train(model, data,
         )
     )
     if FLAGS.resume:
-      print 'resuming from '+checkpoint_dir
+      logging.info('resuming from '+checkpoint_dir)
       saver = tf.train.Saver()
       ckpt = tf.train.get_checkpoint_state(checkpoint_dir+'/')
       if ckpt and ckpt.model_checkpoint_path:

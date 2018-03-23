@@ -210,3 +210,34 @@ def Residual(moduleList, name='Residual'):
             output = tf.add(m(x, is_training=is_training), x)
             return output
     return model
+
+def Block(nOutputPlane, kW, kH, dW=1, dH=1,
+        padding='VALID', bias=True, name='Block',reuse=None,isResudual=True):
+    def block_layer():
+        with tf.variable_scope(name, reuse=reuse):
+            curr_layers = [
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias)
+            ]
+            if isResudual:
+                return Residual(curr_layers)
+            else:
+                return curr_layers
+    return block_layer
+
+def Group(nOutputPlane, kW, kH, dW=1, dH=1,K=10,N=4,
+        padding='VALID', bias=True, name='Group',reuse=None):# K:Network Width;N:GroupNum
+    def group_layer():
+        with tf.variable_scope(name, reuse=reuse):
+            modules = []
+            for i in xrange(0,N):
+                if i==0:
+                    modules+=Block(nOutputPlane*K,kW,kH,dW,dH,padding=padding,bias=bias,reuse=reuse,isResudual=False)
+                else:
+                    modules += [Block(nOutputPlane*K,kW,kH,dW,dH,padding=padding,bias=bias,reuse=reuse)]
+        return Sequential(modules)
+    return group_layer

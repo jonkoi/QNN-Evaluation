@@ -22,7 +22,9 @@ python main.py --model cifar10 --save cifar10 --dataset cifar10 --device x
 * Train cifar10 model using cpu:
 python main.py --model cifar10 --save cifar10 --dataset cifar10 --device x --False
 * Train alexnet model using gpu:
-python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size xxx --device x --data_dir=$YourTFRecordsPath
+python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size xxx --device x --data_dir=$YourTFRecordsPath --decay_steps 10000  
+*Resuming  
+py main.py --model cifar10 --load $CheckPointDir(Eg:results/cifar10/2018-03-14-17-48-19) --resume True --dataset cifar10 --device x
 
 ## Results
 Cifar10 : 90% top-1 accuracy(128 epochs)  

@@ -12,6 +12,7 @@ Changes or update frome orginal version
     * ./ImageNetReading dir contatins scripts for reading imagenet dataset while training;
     * bash ./ImageNetPreProcess/download_and_preprocess_imagenet.sh (Maybe need to change some dir path params) to generate TFRecords before training  
     * python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size xxx --device x --data_dir=$YourTFRecordsPath
+8. supporting Wide Residual Network(WRN)
 ## Dependencies
 tensorflow version 1.4.0
 
@@ -26,7 +27,7 @@ python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size x
 ## Results
 Cifar10 : 90% top-1 accuracy(128 epochs)
 BNNCifar10 : 83.2% top-1 accuracy(128 epochs)
-
+WRN28-10:91.6% top-1 accuracy(128 epochs) for cifar10
 # Below are original version descriptions
 ## BinaryNet.tf
 Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1.  implementation in tensorflow (https://papers.nips.cc/paper/6573-binarized-neural-networks)

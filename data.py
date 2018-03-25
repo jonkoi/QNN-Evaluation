@@ -69,8 +69,14 @@ def __read_cifar(filenames, shuffle=True, cifar100=False):
   record_bytes = tf.decode_raw(value, tf.uint8)
 
   # The first bytes represent the label, which we convert from uint8->int32.
-  label = tf.cast(
-      tf.strided_slice(record_bytes, [0], [label_bytes]), tf.int32)
+  if cifar100:
+    #label = tf.cast(
+    #  tf.strided_slice(record_bytes, [0], [1]), tf.int32) #20 calss
+    label = tf.cast(
+      tf.strided_slice(record_bytes, [1],[label_bytes]), tf.int32)#100 class
+  else:
+    label = tf.cast(
+      tf.strided_slice(record_bytes, [1], [label_bytes]), tf.int32)
 
   # The remaining bytes after the label represent the image, which we reshape
   # from [depth * height * width] to [depth, height, width].
@@ -235,13 +241,13 @@ def get_data_provider(name, training=True):
         url = URLs['cifar100']
         def post_f(f): return tarfile.open(f, 'r:gz').extractall(path)
         __maybe_download(url, path,post_f)
-        data_dir = os.path.join(path, 'cifar-100-batches-bin/')
+        data_dir = os.path.join(path, 'cifar-100-binary/')
         if training:
-            return DataProvider([os.path.join(data_dir, 'train.bin')],
-                                    50000, True, __read_cifar)
+            return DataProvider(__read_cifar([os.path.join(data_dir, 'train.bin')],cifar100=True),
+              [50000,32,32,3], True)
         else:
-            return DataProvider([os.path.join(data_dir, 'test.bin')],
-                                10000, False, __read_cifar)
+            return DataProvider(__read_cifar([os.path.join(data_dir, 'train.bin')],cifar100=True),
+              [10000,32,32,3], False)
 def logInit(fileName,resume):
     logging.basicConfig(level=logging.INFO,
             format='%(asctime)s %(levelname)s: %(message)s',

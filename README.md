@@ -25,8 +25,8 @@ python main.py --model cifar10 --save cifar10 --dataset cifar10 --device x --Fal
 python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size xxx --device x --data_dir=$YourTFRecordsPath
 
 ## Results
-Cifar10 : 90% top-1 accuracy(128 epochs)
-BNNCifar10 : 83.2% top-1 accuracy(128 epochs)
+Cifar10 : 90% top-1 accuracy(128 epochs)  
+BNNCifar10 : 83.2% top-1 accuracy(128 epochs)  
 WRN28-10:91.6% top-1 accuracy(128 epochs) for cifar10
 # Below are original version descriptions
 ## BinaryNet.tf

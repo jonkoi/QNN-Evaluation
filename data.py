@@ -246,7 +246,7 @@ def get_data_provider(name, training=True):
             return DataProvider(__read_cifar([os.path.join(data_dir, 'train.bin')],cifar100=True),
               [50000,32,32,3], True)
         else:
-            return DataProvider(__read_cifar([os.path.join(data_dir, 'train.bin')],cifar100=True),
+            return DataProvider(__read_cifar([os.path.join(data_dir, 'test.bin')],cifar100=True),
               [10000,32,32,3], False)
 def logInit(fileName,resume):
     logging.basicConfig(level=logging.INFO,

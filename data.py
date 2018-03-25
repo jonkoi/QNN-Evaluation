@@ -14,8 +14,8 @@ import re
 import logging
 from ImageNetReading.imagenet_data import ImagenetData
 
+
 #IMAGENET_PATH = './Datasets/ILSVRC2012/'
-IMAGENET_PATH = '/home/xiaohang/dataset/ImageNet/TFRecords'
 DATA_DIR = '/home/xiaohang/dataset/'
 URLs = {
     'cifar10': 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz',
@@ -118,7 +118,7 @@ class DataProvider:
         self.data = data
         self.training = training
 
-    def generate_batches(self, batch_size, min_queue_examples=1000, num_threads=16):
+    def generate_batches(self, batch_size, min_queue_examples=1000, num_threads=8):
         """Construct a queued batch of images and labels.
 
         Args:

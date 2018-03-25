@@ -46,7 +46,7 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_integer('image_size', 224,
                             """Provide square images of this size.""")
-tf.app.flags.DEFINE_integer('num_preprocess_threads', 16,
+tf.app.flags.DEFINE_integer('num_preprocess_threads', 8,
                             """Number of preprocessing threads per tower. """
                             """Please make this a multiple of 4.""")
 tf.app.flags.DEFINE_integer('num_readers', 4,

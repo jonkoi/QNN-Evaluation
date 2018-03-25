@@ -48,6 +48,9 @@ tf.app.flags.DEFINE_integer('decay_steps', 1000,
                            """decay  steps for learning""")
 tf.app.flags.DEFINE_float('decay_rate', 0.9,
                            """decay rate for learning""")
+tf.app.flags.DEFINE_integer('num_threads', 8,
+                           """num_threads for data processing""")
+
 
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = FLAGS.load if FLAGS.resume else  './results/' + FLAGS.save+'/'+currentTime
@@ -108,9 +111,9 @@ def train(model, data,
     with tf.device('/cpu:0'):
         with tf.name_scope('data'):
             if FLAGS.dataset == "imagenet" :
-                x, yt =image_processing.distorted_inputs(data,batch_size=batch_size,num_preprocess_threads=16)
+                x, yt =image_processing.distorted_inputs(data,batch_size=batch_size,num_preprocess_threads=FLAGS.num_threads)
             else :
-                x, yt = data.generate_batches(batch_size)
+                x, yt = data.generate_batches(batch_size,num_threads=FLAGS.num_threads)
         global_step =  tf.get_variable('global_step', shape=[], dtype=tf.int64,
                              initializer=tf.constant_initializer(0),
                              trainable=False)

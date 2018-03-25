@@ -20,7 +20,7 @@ def evaluate(model, dataset,
         data = get_data_provider(dataset, training=False)
         with tf.device('/cpu:0'):
             if FLAGS.dataset == "imagenet" :
-                x, yt =image_processing.inputs(data,batch_size=batch_size,num_preprocess_threads=16)
+                x, yt =image_processing.inputs(data,batch_size=batch_size,num_preprocess_threads=FLAGS.num_threads)
             else :
                 x, yt = data.generate_batches(batch_size)
             is_training = tf.placeholder(tf.bool,[],name='is_training')

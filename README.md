@@ -22,6 +22,7 @@ python main.py --model cifar10 --save cifar10 --dataset cifar10 --device x
 python main.py --model cifar10 --save cifar10 --dataset cifar10 --device x --False
 * Train alexnet model using gpu:
 python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size xxx --device x --data_dir=$YourTFRecordsPath
+
 ## Results
 Cifar10 : 90% top-1 accuracy(128 epochs)
 BNNCifar10 : 83.2% top-1 accuracy(128 epochs)

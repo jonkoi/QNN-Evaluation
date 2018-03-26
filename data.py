@@ -76,7 +76,7 @@ def __read_cifar(filenames, shuffle=True, cifar100=False):
       tf.strided_slice(record_bytes, [1],[label_bytes]), tf.int32)#100 class
   else:
     label = tf.cast(
-      tf.strided_slice(record_bytes, [1], [label_bytes]), tf.int32)
+      tf.strided_slice(record_bytes, [0], [label_bytes]), tf.int32)
 
   # The remaining bytes after the label represent the image, which we reshape
   # from [depth * height * width] to [depth, height, width].

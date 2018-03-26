@@ -19,7 +19,7 @@ tf.app.flags.DEFINE_integer('batch_size', 256,
                             """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_integer('num_epochs', 128,
                             """Number of epochs to train. -1 for unlimited""")
-tf.app.flags.DEFINE_integer('learning_rate', 1e-3,
+tf.app.flags.DEFINE_float('learning_rate', 1e-3,
                             """Initial learning rate used.""")
 tf.app.flags.DEFINE_string('model', 'model',
                            """Name of loaded model.""")
@@ -46,11 +46,12 @@ tf.app.flags.DEFINE_string('test_interval', None,
                            """Interval steps for test loss and accuracy""")
 tf.app.flags.DEFINE_integer('decay_steps', 1000,
                            """decay  steps for learning""")
-tf.app.flags.DEFINE_float('decay_rate', 0.9,
+tf.app.flags.DEFINE_float('decay_rate', 0.96,
                            """decay rate for learning""")
 tf.app.flags.DEFINE_integer('num_threads', 8,
                            """num_threads for data processing""")
-
+tf.app.flags.DEFINE_string('using_learning_rate_decay_fn', False,
+                           """whether using learning_rate_decay_fn or not;if not .using optimtizer auto deacy  """)
 
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = FLAGS.load if FLAGS.resume else  './results/' + FLAGS.save+'/'+currentTime
@@ -132,7 +133,8 @@ def train(model, data,
         opt = tf.contrib.layers.optimize_loss(loss, global_step, learning_rate, 'Adam',
                                               gradient_noise_scale=None, gradient_multipliers=None,
                                               clip_gradients=None, #moving_average_decay=0.9,
-                                              learning_rate_decay_fn=learning_rate_decay_fn, update_ops=None, variables=None, name=None)
+                                              learning_rate_decay_fn=learning_rate_decay_fn if FLAGS.using_learning_rate_decay_fn else None,
+                                              update_ops=None, variables=None, name=None)
         #grads = opt.compute_gradients(loss)
         #apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
 

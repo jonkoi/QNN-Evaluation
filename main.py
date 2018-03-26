@@ -50,8 +50,8 @@ tf.app.flags.DEFINE_float('decay_rate', 0.96,
                            """decay rate for learning""")
 tf.app.flags.DEFINE_integer('num_threads', 8,
                            """num_threads for data processing""")
-tf.app.flags.DEFINE_string('using_learning_rate_decay_fn', False,
-                           """whether using learning_rate_decay_fn or not;if not .using optimtizer auto deacy  """)
+tf.app.flags.DEFINE_string('using_learning_rate_decay_fn', True,
+                           """whether using learning_rate_decay_fn or not;if not , using optimtizer auto deacy  """)
 
 currentTime=time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 FLAGS.checkpoint_dir = FLAGS.load if FLAGS.resume else  './results/' + FLAGS.save+'/'+currentTime

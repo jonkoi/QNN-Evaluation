@@ -212,8 +212,17 @@ def Residual(moduleList, name='Residual'):
     return model
 
 def Block(nOutputPlane, kW, kH, dW=1, dH=1,
-        padding='VALID', bias=True, name='Block',reuse=None,isResudual=True):
+        padding='VALID', bias=True, name='Block',reuse=None,isResudual=True,tepe=basic):
     with tf.variable_op_scope(None, name, reuse=reuse):
+        if type==basic:
+            curr_layers = [
+            BatchNormalization(),
+            ReLU(),
+            SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+            BatchNormalization(),
+            ReLU(),
+            SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias)
+        ]
         curr_layers = [
             BatchNormalization(),
             ReLU(),

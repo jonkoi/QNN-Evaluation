@@ -1,17 +1,17 @@
 from nnUtils import *
 
-# WRN28-10 for cifar10
-## for WRN28-10: K=10.N=(28-4)/6=4
+# WRN50-2 bottleNeck for alexnet
+## for WRN50-2: K=2.N=(50-4)/6=7
 K=10
 N=4
 model = Sequential([
-    SpatialConvolution(16,3,3,padding='SAME'),
+    SpatialConvolution(64,7,7,padding='SAME'),
     Group(16,3,3,K=K,N=N,padding='SAME'),
-    SpatialMaxPooling(2,2,2,2),
+    SpatialMaxPooling(3,3,2,2),
     Group(32,3,3,K=K,N=N,padding='SAME'),
-    SpatialMaxPooling(2,2,2,2),
+    SpatialMaxPooling(3,3,2,2),
     Group(64,3,3,K=K,N=N,padding='SAME'),
-    SpatialAveragePooling(8,8,1,1),
+    SpatialAveragePooling(7,7,1,1),
     BatchNormalization(),
     ReLU(),
     Affine(10)

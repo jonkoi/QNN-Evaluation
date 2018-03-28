@@ -218,69 +218,78 @@ def Residual(moduleList, name='Residual',fixPaddingFilters=0,fixPaddingStride=1)
 
 def Block(nOutputPlane, kW, kH, dW=1, dH=1,
         padding='VALID', bias=True, name='Block',reuse=None,fixPaddingFilters=0,type='basic',bottleWidth=2):
-    with tf.variable_op_scope(None, name, reuse=reuse):
-        if type=='basic':
-            curr_layers = [
-                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias),
-                BatchNormalization()
-            ]
-        elif type=='pre':
-            curr_layers = [
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias)
-            ]
-        elif type=='bottleneck':
-            curr_layers = [
-                SpatialConvolution(nOutputPlane,1,1,1,1, padding='valid',bias=bias),
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane*bottleWidth,1,1,1,1, padding='valid',bias=bias),
-                BatchNormalization()
-            ]
-        if type=='dropout':
-            curr_layers = [
-                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
-                ReLU(),
-                Dropout(0.5),
-                SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias)
-            ]
-        elif type=='prebottleneck':
-            curr_layers = [
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane,1,1,1,1, padding='valid',bias=bias),
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
-                BatchNormalization(),
-                ReLU(),
-                SpatialConvolution(nOutputPlane*bottleWidth,1,1,1,1, padding='valid',bias=bias)
-            ]
-        if 'pre' in type:
-            return [Residual(curr_layers,fixPaddingFilters=fixPaddingFilters,fixPaddingStride=dW)]
-        else:
-            return [Residual(curr_layers,fixPaddingFilters=fixPaddingFilters,fixPaddingStride=dW)]+[ReLU()]
+    def model(x, is_training=True):
+        with tf.variable_op_scope([x],None, name, reuse=reuse):
+            if type=='basic':
+                curr_layers = [
+                    SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias),
+                    BatchNormalization()
+                ]
+            elif type=='pre':
+                curr_layers = [
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias)
+                ]
+            elif type=='bottleneck':
+                curr_layers = [
+                    SpatialConvolution(nOutputPlane,1,1,1,1, padding='valid',bias=bias),
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane*bottleWidth,1,1,1,1, padding='valid',bias=bias),
+                    BatchNormalization()
+                ]
+            if type=='dropout':
+                curr_layers = [
+                    SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                    ReLU(),
+                    Dropout(0.5),
+                    SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias)
+                ]
+            elif type=='prebottleneck':
+                curr_layers = [
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane,1,1,1,1, padding='valid',bias=bias),
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                    BatchNormalization(),
+                    ReLU(),
+                    SpatialConvolution(nOutputPlane*bottleWidth,1,1,1,1, padding='valid',bias=bias)
+                ]
+            if 'pre' in type:
+                m=Sequential([Residual(curr_layers,fixPaddingFilters=fixPaddingFilters,fixPaddingStride=dW)])
+            else:
+                m=Sequential([Residual(curr_layers,fixPaddingFilters=fixPaddingFilters,fixPaddingStride=dW)]
+                    +[ReLU()])
+            output=m(x,is_training=is_training)
+            return output
+        return model
 
 def Group(nOutputPlane, kW, kH, dW=1, dH=1,K=10,N=4,
         padding='VALID', bias=True, name='Group',reuse=None,
         fixPaddingFilters=0,bottleWidth=2):# K:Network Width;N:GroupNum
-    with tf.variable_op_scope(None,name,reuse=reuse):
-        modules = []
-        for i in xrange(0,N):
-            if i==0:
-                modules +=Block(nOutputPlane*K,kW,kH,dW,dH,padding=padding,bias=bias,
-                    reuse=reuse,fixPaddingFilters=fixPaddingFilters,bottleWidth=bottleWidth)
-            else:
-                modules += Block(nOutputPlane*K,kW,kH,1,1,padding=padding,bias=bias,
-                    reuse=reuse,fixPaddingFilters=0,bottleWidth=bottleWidth)
-    return Sequential(modules)
+    def model(x, is_training=True):
+        with tf.variable_op_scope([x],None,name,reuse=reuse):
+            modules = []
+            for i in xrange(0,N):
+                if i==0:
+                    modules +=Block(nOutputPlane*K,kW,kH,dW,dH,padding=padding,bias=bias,
+                        reuse=reuse,fixPaddingFilters=fixPaddingFilters,bottleWidth=bottleWidth)
+                else:
+                    modules += Block(nOutputPlane*K,kW,kH,1,1,padding=padding,bias=bias,
+                        reuse=reuse,fixPaddingFilters=0,bottleWidth=bottleWidth)
+            m=Sequential(modules)
+            output=m(x,is_training=is_training)
+            return output
+    return model

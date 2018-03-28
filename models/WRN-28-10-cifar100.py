@@ -6,13 +6,11 @@ K=10
 N=4
 model = Sequential([
     SpatialConvolution(16,3,3,padding='SAME'),
-    Group(16,3,3,K=K,N=N,padding='SAME'),
-    SpatialMaxPooling(2,2,2,2),
-    Group(32,3,3,K=K,N=N,padding='SAME'),
-    SpatialMaxPooling(2,2,2,2),
-    Group(64,3,3,K=K,N=N,padding='SAME'),
-    SpatialAveragePooling(8,8,1,1),
     BatchNormalization(),
     ReLU(),
+    Group(16,3,3,K=K,N=N,padding='SAME',fixPaddingFilters=16*K-16),
+    Group(32,3,3,2,2,K=K,N=N,padding='SAME',fixPaddingFilters=16*K), #32-16
+    Group(64,3,3,2,2,K=K,N=N,padding='SAME',fixPaddingFilters=32*K), #64-32
+    SpatialAveragePooling(8,8,1,1),
     Affine(100)
 ])

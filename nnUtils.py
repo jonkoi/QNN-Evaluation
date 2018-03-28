@@ -202,7 +202,60 @@ def Concat(moduleList, dim=3):
         return output
     return model
 
-def Residual(moduleList, name='Residual',fixPaddingFilters=0,fixPaddingStride=1):
+def Residual(nOutputPlane, kW, kH, dW=1, dH=1,padding='VALID', bias=True, name='Residual',
+            reuse=None,fixPaddingFilters=0,type='basic',bottleWidth=2):
+    moduleList=[]
+    if type=='basic':
+            curr_layers = [
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias),
+                BatchNormalization()
+            ]
+    elif type=='pre':
+            curr_layers = [
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias)
+            ]
+    elif type=='bottleneck':
+            curr_layers = [
+                SpatialConvolution(nOutputPlane,1,1,1,1, padding='valid',bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane*bottleWidth,1,1,1,1, padding='valid',bias=bias),
+                BatchNormalization()
+            ]
+    if type=='dropout':
+            curr_layers = [
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                ReLU(),
+                Dropout(0.5),
+                SpatialConvolution(nOutputPlane,kW,kH,1,1, padding=padding,bias=bias)
+            ]
+    elif type=='prebottleneck':
+            curr_layers = [
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,1,1,1,1, padding='valid',bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane,kW,kH,dW,dH, padding=padding,bias=bias),
+                BatchNormalization(),
+                ReLU(),
+                SpatialConvolution(nOutputPlane*bottleWidth,1,1,1,1, padding='valid',bias=bias)
+            ]
+    if 'pre' in type:
+        moduleList=curr_layers
+    else:
+        moduleList=curr_layers+[ReLU()]
     m = Sequential(moduleList)
     def model(x, is_training=True):
     # Create model
@@ -210,12 +263,30 @@ def Residual(moduleList, name='Residual',fixPaddingFilters=0,fixPaddingStride=1)
             orig_x=x
             with tf.variable_op_scope(None, 'fixPadding', reuse=None):
                 if fixPaddingFilters > 0:#zero padding input if input channels ~= output channels
-                    x=tf.nn.avg_pool(x, ksize=[1, 1, 1, 1], strides=[1, fixPaddingStride,fixPaddingStride, 1],padding='VALID')
+                    x=tf.nn.avg_pool(x, ksize=[1, 1, 1, 1], strides=[1, dW,dH, 1],padding='VALID')
                     x=tf.pad(x,[[0, 0], [0, 0], [0, 0],[fixPaddingFilters//2, fixPaddingFilters//2]])
             output = tf.add(m(orig_x, is_training=is_training), x)
             return output
     return model
 
+def Block(nOutputPlane, kW, kH, dW=1, dH=1,K=10,N=4,
+        padding='VALID', bias=True, name='Block',reuse=None,type='basic',
+        fixPaddingFilters=0,bottleWidth=2):# K:Network Width;N:GroupNum
+    def model(x, is_training=True):
+        with tf.variable_op_scope([x],None,name,reuse=reuse):
+            modules = []
+            for i in xrange(0,N):
+                if i==0:
+                    modules +=[Residual(nOutputPlane*K,kW,kH,dW,dH,padding=padding,bias=bias,
+                        reuse=reuse,fixPaddingFilters=fixPaddingFilters,type=type,bottleWidth=bottleWidth)]
+                else:
+                    modules += [Residual(nOutputPlane*K,kW,kH,1,1,padding=padding,bias=bias,
+                        reuse=reuse,fixPaddingFilters=0,type=type,bottleWidth=bottleWidth)]
+            m=Sequential(modules)
+            output=m(x,is_training=is_training)
+            return output
+    return model
+'''
 def Block(nOutputPlane, kW, kH, dW=1, dH=1,
         padding='VALID', bias=True, name='Block',reuse=None,fixPaddingFilters=0,type='basic',bottleWidth=2):
     def model(x, is_training=True):
@@ -275,21 +346,5 @@ def Block(nOutputPlane, kW, kH, dW=1, dH=1,
             output=m(x,is_training=is_training)
             return output
         return model
+'''
 
-def Group(nOutputPlane, kW, kH, dW=1, dH=1,K=10,N=4,
-        padding='VALID', bias=True, name='Group',reuse=None,
-        fixPaddingFilters=0,bottleWidth=2):# K:Network Width;N:GroupNum
-    def model(x, is_training=True):
-        with tf.variable_op_scope([x],None,name,reuse=reuse):
-            modules = []
-            for i in xrange(0,N):
-                if i==0:
-                    modules +=Block(nOutputPlane*K,kW,kH,dW,dH,padding=padding,bias=bias,
-                        reuse=reuse,fixPaddingFilters=fixPaddingFilters,bottleWidth=bottleWidth)
-                else:
-                    modules += Block(nOutputPlane*K,kW,kH,1,1,padding=padding,bias=bias,
-                        reuse=reuse,fixPaddingFilters=0,bottleWidth=bottleWidth)
-            m=Sequential(modules)
-            output=m(x,is_training=is_training)
-            return output
-    return model

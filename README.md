@@ -12,7 +12,7 @@ Changes or update frome orginal version
     * ./ImageNetReading dir contatins scripts for reading imagenet dataset while training;
     * bash ./ImageNetPreProcess/download_and_preprocess_imagenet.sh (Maybe need to change some dir path params) to generate TFRecords before training  
     * python main.py --model alexnet --save alexnet --dataset imagenet  --batch_size xxx --device x --data_dir=$YourTFRecordsPath
-8. supporting Residual Network Wide Residual Network(WRN)
+8. supporting Residual Neural Network and Wide Residual Network(WRN) including ResNet and WRN of basic,bottleneck,pre-activation,dropout
 ## Dependencies
 tensorflow version 1.4.0
 

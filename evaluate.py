@@ -61,7 +61,7 @@ def evaluate(model, dataset,
         try:
             threads = []
             for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
-             threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
+                threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
                                        start=True))
 
             num_batches = int(math.ceil(data.size[0] / batch_size))

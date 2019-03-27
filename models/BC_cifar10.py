@@ -1,0 +1,30 @@
+from nnUtils import *
+
+model = Sequential([
+    BinarizedWeightOnlySpatialConvolution(128,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlySpatialConvolution(128,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlySpatialConvolution(256,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlySpatialConvolution(256,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlySpatialConvolution(512,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlySpatialConvolution(512,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlyAffine(1024, bias=False),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedWeightOnlyAffine(10),
+    BatchNormalization()
+])

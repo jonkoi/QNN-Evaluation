@@ -1,7 +1,7 @@
 from nnUtils import *
 
 model = Sequential([
-    SpatialConvolution(128,3,3,1,1, padding='VALID', bias=False),
+    SpatialConvolution(128,3,3,1,1, padding='SAME', bias=False),
     BatchNormalization(),
     ReLU(),
     SpatialConvolution(128,3,3, padding='SAME', bias=False),
@@ -20,9 +20,6 @@ model = Sequential([
     ReLU(),
     SpatialConvolution(512,3,3, padding='SAME', bias=False),
     SpatialMaxPooling(2,2,2,2),
-    BatchNormalization(),
-    ReLU(),
-    Affine(1024, bias=False),
     BatchNormalization(),
     ReLU(),
     Affine(1024, bias=False),

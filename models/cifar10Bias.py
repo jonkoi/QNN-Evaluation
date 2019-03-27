@@ -25,8 +25,5 @@ model = Sequential([
     Affine(1024, bias=False),
     BatchNormalization(),
     ReLU(),
-    Affine(1024, bias=False),
-    BatchNormalization(),
-    ReLU(),
     Affine(10)
 ])

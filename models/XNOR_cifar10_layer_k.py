@@ -1,0 +1,30 @@
+from nnUtils_BWN_layer import *
+
+model = Sequential([
+    BinaryNWSpatialConvolution(128,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    XNORSpatialConvolution(128,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    XNORSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    XNORSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    XNORSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    XNORSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedAffine(1024, bias=False),
+    BatchNormalization(),
+    ReLU(),
+    BinarizedAffine(10),
+    BatchNormalization()
+])

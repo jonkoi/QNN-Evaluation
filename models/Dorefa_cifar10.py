@@ -1,0 +1,30 @@
+from nnUtils_Dorefa import *
+
+model = Sequential([
+    DorefaOnlyWeightSpatialConvolution(128,3,3,padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    DorefaSpatialConvolution(128,3,3,padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    DorefaSpatialConvolution(256,3,3,padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    DorefaSpatialConvolution(256,3,3 ,padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    DorefaSpatialConvolution(512,3,3,padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    DorefaSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    DoReFaAffine(1024, bias=False),
+    BatchNormalization(),
+    ReLU(),
+    DoReFaAffine(10),
+    BatchNormalization()
+])

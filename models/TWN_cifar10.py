@@ -1,0 +1,30 @@
+from nnUtils_TWN import *
+
+model = Sequential([
+    TWNSpatialConvolution(128,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TWNSpatialConvolution(128,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    TWNSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TWNSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    TWNSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TWNSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    TWNAffine(1024, bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TWNAffine(10),
+    BatchNormalization()
+])

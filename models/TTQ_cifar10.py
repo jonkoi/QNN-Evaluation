@@ -1,0 +1,30 @@
+from nnUtils_TTQ import *
+
+model = Sequential([
+    TTQSpatialConvolution(128,3,3,padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TTQSpatialConvolution(128,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    TTQSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TTQSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    TTQSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TTQSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    TTQAffine(1024, bias=False),
+    BatchNormalization(),
+    ReLU(),
+    TTQAffine(10),
+    BatchNormalization()
+])

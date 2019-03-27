@@ -1,0 +1,30 @@
+from nnUtils_ABC import *
+
+model = Sequential([
+    ABCSpatialConvolutionFirst(128,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    ABCSpatialConvolution(128,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    ABCSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    ABCSpatialConvolution(256,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    ABCSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    BatchNormalization(),
+    ReLU(),
+    ABCSpatialConvolution(512,3,3, padding='SAME', bias=False),
+    SpatialMaxPooling(2,2,2,2),
+    BatchNormalization(),
+    ReLU(),
+    Affine(1024, bias=False),
+    BatchNormalization(),
+    ReLU(),
+    Affine(10),
+    BatchNormalization()
+])

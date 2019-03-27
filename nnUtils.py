@@ -3,6 +3,17 @@ import math
 from tensorflow.python.training import moving_averages
 from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.framework import ops
+import numpy as np
+
+def py_func(func, inp, Tout, stateful=True, name=None, grad=None):
+
+    # Need to generate a unique name to avoid duplicates:
+    rnd_name = 'PyFuncGrad' + str(np.random.randint(0, 1E+8))
+
+    tf.RegisterGradient(rnd_name)(grad)
+    g = tf.get_default_graph()
+    with g.gradient_override_map({"PyFunc": rnd_name}):
+        return tf.py_func(func, inp, Tout, stateful=stateful, name=name)
 
 def binarize(x):
     """
@@ -14,6 +25,32 @@ def binarize(x):
         with g.gradient_override_map({"Sign": "Identity"}):
             x=tf.clip_by_value(x,-1,1)
             return tf.sign(x)
+
+def binarize_stochastic(x, name=None):
+    """Creates the binarize_weights Op with f as forward pass
+    and df as the gradient for the backward pass
+    Args:
+        x: The input Tensor
+        name: the name for the Op
+
+    Returns:
+        The output tensor
+    """
+    def f(x):
+        y = np.clip(x, -1, 1)
+        y = (y / 2) + 0.5
+        sample = np.random.uniform(size=x.shape)
+        z = np.ceil(y-sample)
+        return np.array(2*z-1, dtype=np.float32)
+
+    def df(op, grad):
+        x = op.inputs[0]
+        alpha = tf.cast(tf.less_equal(tf.abs(x), 1), tf.float32) # alpha = (|x| <= 1) * 1
+        return tf.multiply(grad, alpha) # grad * alpha
+
+    with ops.name_scope(name, 'BinarizeWeights', [x]) as name:
+        fx = py_func(f, [x], [tf.float32], name=name, grad=df)
+        return fx[0]
 
 def BinarizedSpatialConvolution(nOutputPlane, kW, kH, dW=1, dH=1,
         padding='VALID', bias=True, reuse=None, name='BinarizedSpatialConvolution'):
@@ -32,11 +69,13 @@ def BinarizedSpatialConvolution(nOutputPlane, kW, kH, dW=1, dH=1,
             if bias:
                 b = tf.get_variable('bias', [nOutputPlane],initializer=tf.zeros_initializer)
                 out = tf.nn.bias_add(out, b)
+            tf.summary.histogram(name + '_bWeights', bin_w)
+            tf.summary.histogram(name + '_bActivation', bin_x)
             return out
     return b_conv2d
 
 def BinarizedWeightOnlySpatialConvolution(nOutputPlane, kW, kH, dW=1, dH=1,
-        padding='VALID', bias=True, reuse=None, name='BinarizedWeightOnlySpatialConvolution'):
+        padding='VALID', bias=True, reuse=None, name='BinarizedWeightOnlySpatialConvolution', stochastic = False):
     '''
     This function is used only at the first layer of the model as we dont want to binarized the RGB images
     '''
@@ -45,11 +84,17 @@ def BinarizedWeightOnlySpatialConvolution(nOutputPlane, kW, kH, dW=1, dH=1,
         with tf.variable_op_scope([x], None, name, reuse=reuse):
             w = tf.get_variable('weight', [kH, kW, nInputPlane, nOutputPlane],
                             initializer=tf.contrib.layers.xavier_initializer_conv2d())
-            bin_w = binarize(w)
+            if not stochastic:
+                bin_w = binarize(w)
+            else:
+                print('STOCHASTIC')
+                bin_w = binarize_stochastic(w)
+                bin_w.set_shape(w.get_shape())
             out = tf.nn.conv2d(x, bin_w, strides=[1, dH, dW, 1], padding=padding)
             if bias:
                 b = tf.get_variable('bias', [nOutputPlane],initializer=tf.zeros_initializer)
                 out = tf.nn.bias_add(out, b)
+            tf.summary.histogram(name + '_bWeights', bin_w)
             return out
     return bc_conv2d
 
@@ -96,10 +141,11 @@ def BinarizedAffine(nOutputPlane, bias=True, name=None, reuse=None):
             if bias:
                 b = tf.get_variable('bias', [nOutputPlane],initializer=tf.zeros_initializer)
                 output = tf.nn.bias_add(output, b)
+
         return output
     return b_affineLayer
 
-def BinarizedWeightOnlyAffine(nOutputPlane, bias=True, name=None, reuse=None):
+def BinarizedWeightOnlyAffine(nOutputPlane, bias=True, name=None, reuse=None, stochastic=False):
     def bwo_affineLayer(x, is_training=True):
         with tf.variable_op_scope([x], name, 'Affine', reuse=reuse):
             '''
@@ -109,7 +155,11 @@ def BinarizedWeightOnlyAffine(nOutputPlane, bias=True, name=None, reuse=None):
             reshaped = tf.reshape(x, [x.get_shape().as_list()[0], -1])
             nInputPlane = reshaped.get_shape().as_list()[1]
             w = tf.get_variable('weight', [nInputPlane, nOutputPlane], initializer=tf.contrib.layers.xavier_initializer())
-            bin_w = binarize(w)
+            if not stochastic:
+                bin_w = binarize(w)
+            else:
+                bin_w = binarize_stochastic(w)
+                bin_w.set_shape(w.get_shape())
             output = tf.matmul(reshaped, bin_w)
             if bias:
                 b = tf.get_variable('bias', [nOutputPlane],initializer=tf.zeros_initializer)
@@ -300,4 +350,3 @@ def Block(nOutputPlane, kW, kH, dW=1, dH=1,K=10,N=4,padding='VALID', bias=True, 
             output=m(x,is_training=is_training)
             return output
     return model
-

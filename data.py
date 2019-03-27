@@ -16,7 +16,7 @@ from ImageNetReading.imagenet_data import ImagenetData
 
 
 #IMAGENET_PATH = './Datasets/ILSVRC2012/'
-DATA_DIR = '/home/xiaohang/dataset/'
+DATA_DIR = '/home/khoi/dataSet/'
 URLs = {
     'cifar10': 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz',
     'cifar100': 'http://www.cs.toronto.edu/~kriz/cifar-100-binary.tar.gz'
@@ -163,7 +163,7 @@ class DataProvider:
             images, label_batch = tf.train.batch(
 			      [image, label],
             batch_size=batch_size,
-            num_threads=num_threads,
+            num_threads=1,
             capacity=min_queue_examples + 3 * batch_size)
 
         return images, tf.reshape(label_batch, [batch_size])
@@ -187,6 +187,8 @@ def distorted_inputs(img, height=None, width=None, normalize=None):
 
     # Image processing for training the network. Note the many random
     # distortions applied to the image.
+
+    img = tf.image.resize_image_with_crop_or_pad(img, 40, 40)
 
     # Randomly crop a [height, width] section of the image.
     distorted_image = tf.random_crop(img, [height, width, 3])
@@ -232,7 +234,7 @@ def get_data_provider(name, training=True):
         data_dir = os.path.join(path, 'cifar-10-batches-bin/')
         if training:
             return DataProvider(__read_cifar([os.path.join(data_dir, 'data_batch_%d.bin' % i)
-                                    for i in xrange(1, 6)]), [50000, 32,32,3], True)
+                                    for i in range(1, 6)]), [50000, 32,32,3], True)
         else:
             return DataProvider(__read_cifar([os.path.join(data_dir, 'test_batch.bin')]),
                                 [10000, 32,32, 3], False)
